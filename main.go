@@ -10,9 +10,27 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
+type MyEvent struct {
+	Query string `json:"q"`
+}
+
+type MyResponse struct {
+	Message string `json:"Result:"`
+}
+
+func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
+	return MyResponse{Message: fmt.Sprintf("%s", event.Query)}, nil
+}
+
 func main() {
+	lambda.Start(HandleLambdaEvent)
+}
+
+func mainOri() {
 	// initialize searcher
 	searcher := &Searcher{}
 	err := searcher.Load("data.gz")
