@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
@@ -86,71 +84,12 @@ func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
 	// search relevant records
 	records, err := searcher.Search(event.Query)
 	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		//w.Write([]byte(err.Error()))
 		//return
 	}
-	// output success response
-	buf := new(bytes.Buffer)
-	encoder := json.NewEncoder(buf)
-	encoder.Encode(records)
-	//w.Header().Set("Content-Type", "application/json")
-	//w.Write(buf.Bytes())
 
 	return MyResponse{Message: fmt.Sprintf("%#v", records)}, nil
 }
 
 func main() {
 	lambda.Start(HandleLambdaEvent)
-}
-
-func mainOri() {
-	// initialize searcher
-	searcher := &Searcher{}
-	err := searcher.Load("data.gz")
-	if err != nil {
-		log.Fatalf("unable to load search data due: %v", err)
-	}
-	// define http handlers
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fs)
-	http.HandleFunc("/search", handleSearch(searcher))
-	// define port, we need to set it as env for Heroku deployment
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3001"
-	}
-	// start server
-	fmt.Printf("Server is listening on %s...", port)
-	err = http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
-	if err != nil {
-		log.Fatalf("unable to start server due: %v", err)
-	}
-}
-
-func handleSearch(s *Searcher) http.HandlerFunc {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			// fetch query string from query params
-			q := r.URL.Query().Get("q")
-			if len(q) == 0 {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("missing search query in query params"))
-				return
-			}
-			// search relevant records
-			records, err := s.Search(q)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-				return
-			}
-			// output success response
-			buf := new(bytes.Buffer)
-			encoder := json.NewEncoder(buf)
-			encoder.Encode(records)
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(buf.Bytes())
-		},
-	)
 }
