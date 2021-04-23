@@ -5,11 +5,14 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
 type MyEvent struct {
@@ -72,22 +75,64 @@ func (s *Searcher) Search(query string) ([]Record, error) {
 	return result, nil
 }
 
+func searchFromDynamoDB(query string) *dynamodb.ScanOutput {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("me-south-1")},
+	)
+
+	fmt.Println("Hello, World!")
+
+	svc := dynamodb.New(sess)
+
+	filt := expression.Name("title").Contains(query)
+	proj := expression.NamesList(expression.Name("title"), expression.Name("content"))
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	input := &dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+		TableName:                 aws.String("hthc-kraicklist-data"),
+	}
+
+	result, err := svc.Scan(input)
+	// if err != nil {
+	//     if aerr, ok := err.(awserr.Error); ok {
+	//            fmt.Println(aerr.Error())
+	//     } else {
+	//         fmt.Println(err.Error())
+	//     }
+	//     return
+	// }
+
+	// fmt.Println(result)
+	return result
+}
+
 func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
 
 	// initialize searcher
-	searcher := &Searcher{}
-	err := searcher.Load("data.gz")
-	if err != nil {
-		log.Fatalf("unable to load search data due: %v", err)
-	}
+	// searcher := &Searcher{}
+	// err := searcher.Load("data.gz")
+	// if err != nil {
+	// 	log.Fatalf("unable to load search data due: %v", err)
+	// }
 
 	// search relevant records
-	records, err := searcher.Search(event.Query)
-	if err != nil {
-		//return
-	}
+	// records, err := searcher.Search(event.Query)
 
-	return MyResponse{Message: fmt.Sprintf("%#v", records)}, nil
+	// if err != nil {
+	//return
+	// }
+
+	aret := searchFromDynamoDB("Stallion")
+	fmt.Println(aret)
+
+	return MyResponse{Message: fmt.Sprintf("%#v", aret)}, nil
 }
 
 func main() {
