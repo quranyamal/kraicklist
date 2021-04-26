@@ -37,7 +37,7 @@ type Record struct {
 	ImageURLs []string `json:"image_urls"`
 }
 
-func unmarshal(scanOutput *dynamodb.ScanOutput) string {
+func unmarshal(scanOutput *dynamodb.ScanOutput) (string, error) {
 
 	var recordArray []Record
 
@@ -47,6 +47,7 @@ func unmarshal(scanOutput *dynamodb.ScanOutput) string {
 
 		if err != nil {
 			fmt.Println("Got error unmarshalling: ", err.Error())
+			return "", err
 		}
 
 		recordArray = append(recordArray, record)
@@ -54,19 +55,20 @@ func unmarshal(scanOutput *dynamodb.ScanOutput) string {
 
 	recJson, err := json.Marshal(recordArray)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Got error marshaling result: ", err.Error())
+		return "", err
 	}
 
-	return string(recJson)
-
+	return string(recJson), nil
 }
 
-func search(query string) string {
+func search(query string) (string, error) {
 
 	filt := expression.Name("title").Contains(query)
 	expr, err := expression.NewBuilder().WithFilter(filt).Build()
 	if err != nil {
 		fmt.Println(err)
+		return "", err
 	}
 
 	input := &dynamodb.ScanInput{
@@ -77,20 +79,27 @@ func search(query string) string {
 	}
 
 	result, err := svc.Scan(input)
-
-	// Checking for errors, return error
 	if err != nil {
 		fmt.Println("Query API call failed: ", err.Error())
+		return "", err
 	}
 
-	unmarshalledResult := unmarshal(result)
+	unmarshalledResult, err := unmarshal(result)
+	if err != nil {
+		return "", err
+	}
 
-	return unmarshalledResult
+	return unmarshalledResult, nil
 }
 
 func HandleApiGatewayEvent(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	searchResult := search(req.QueryStringParameters["q"])
+	searchResult, err := search(req.QueryStringParameters["q"])
+
+	if err != nil {
+		fmt.Println("Search error: ", err.Error())
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
