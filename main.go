@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
-	
+	"fmt"
+
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,13 +13,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
-
 var sess, err = session.NewSession(&aws.Config{
-    Region: aws.String("me-south-1")},
+	Region: aws.String("me-south-1")},
 )
 
 var svc = dynamodb.New(sess)
-
 
 type MyEvent struct {
 	Query string `json:"q"`
@@ -38,7 +37,6 @@ type Record struct {
 	ImageURLs []string `json:"image_urls"`
 }
 
-
 func unmarshal(scanOutput *dynamodb.ScanOutput) string {
 
 	var recordArray []Record
@@ -53,7 +51,7 @@ func unmarshal(scanOutput *dynamodb.ScanOutput) string {
 
 		recordArray = append(recordArray, record)
 	}
-	
+
 	recJson, err := json.Marshal(recordArray)
 	if err != nil {
 		fmt.Println(err)
@@ -68,14 +66,14 @@ func search(query string) string {
 	filt := expression.Name("title").Contains(query)
 	expr, err := expression.NewBuilder().WithFilter(filt).Build()
 	if err != nil {
-	  fmt.Println(err)
+		fmt.Println(err)
 	}
 
 	input := &dynamodb.ScanInput{
-	  ExpressionAttributeNames:  expr.Names(),
-	  ExpressionAttributeValues: expr.Values(),
-	  FilterExpression:          expr.Filter(),
-	  TableName:                 aws.String("hthc-kraicklist-data"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		TableName:                 aws.String("hthc-kraicklist-data"),
 	}
 
 	result, err := svc.Scan(input)
@@ -90,16 +88,46 @@ func search(query string) string {
 	return unmarshalledResult
 }
 
-func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
+func HandleLambdaEvent(event MyEvent) (events.APIGatewayProxyResponse, error) {
 
+	fmt.Println("== event ==")
+	fmt.Println(event)
+	fmt.Println("|= event =|")
 	searchResult := search(event.Query)
-	
+
 	fmt.Println("searchResult:")
 	fmt.Println(searchResult)
 
-	return MyResponse{Message: searchResult}, nil
+	// return MyResponse{Message: searchResult}, nil
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		Body: searchResult,
+	}, nil
+}
+
+func HandleApiGatewayEvent(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	fmt.Println("== req ==")
+	fmt.Println(req)
+	fmt.Println("|= req =|")
+	searchResult := search(req.QueryStringParameters["q"])
+
+	fmt.Println("searchResult:")
+	fmt.Println(searchResult)
+
+	// return MyResponse{Message: searchResult}, nil
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		Body: searchResult,
+	}, nil
 }
 
 func main() {
-	lambda.Start(HandleLambdaEvent)
+	lambda.Start(HandleApiGatewayEvent)
 }
