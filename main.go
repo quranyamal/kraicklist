@@ -88,37 +88,10 @@ func search(query string) string {
 	return unmarshalledResult
 }
 
-func HandleLambdaEvent(event MyEvent) (events.APIGatewayProxyResponse, error) {
-
-	fmt.Println("== event ==")
-	fmt.Println(event)
-	fmt.Println("|= event =|")
-	searchResult := search(event.Query)
-
-	fmt.Println("searchResult:")
-	fmt.Println(searchResult)
-
-	// return MyResponse{Message: searchResult}, nil
-	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-		Body: searchResult,
-	}, nil
-}
-
 func HandleApiGatewayEvent(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	fmt.Println("== req ==")
-	fmt.Println(req)
-	fmt.Println("|= req =|")
 	searchResult := search(req.QueryStringParameters["q"])
 
-	fmt.Println("searchResult:")
-	fmt.Println(searchResult)
-
-	// return MyResponse{Message: searchResult}, nil
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers: map[string]string{
