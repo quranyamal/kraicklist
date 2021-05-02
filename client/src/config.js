@@ -8,9 +8,9 @@ const config = {
       URL: "https://ao7kmvfls9.execute-api.me-south-1.amazonaws.com/prod",
     },
     cognito: {
-      REGION: "me-south-1",
-      USER_POOL_ID: "YOUR_COGNITO_USER_POOL_ID",
-      APP_CLIENT_ID: "YOUR_COGNITO_APP_CLIENT_ID",
+      REGION: "ap-southeast-1",
+      USER_POOL_ID: "ap-southeast-1_juoiN7kLV",
+      APP_CLIENT_ID: "7gu6iag2s52c69r6m4etv45k7b",
       IDENTITY_POOL_ID: "YOUR_IDENTITY_POOL_ID",
     },
   };
