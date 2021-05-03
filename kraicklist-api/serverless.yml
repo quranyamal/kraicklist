@@ -26,8 +26,8 @@ provider:
   lambdaHashingVersion: 20201221
 
 # you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  stage: prod
+  region: me-south-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -45,6 +45,18 @@ provider:
 #            - "Ref" : "ServerlessDeploymentBucket"
 #            - "/*"
 
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - "*" ## todo: fix
+
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
@@ -55,6 +67,12 @@ package:
     - ./bin/**
 
 functions:
+  search:
+    handler: bin/search
+    events:
+      - httpApi:
+          path: /products
+          method: get
   hello:
     handler: bin/hello
     events:
