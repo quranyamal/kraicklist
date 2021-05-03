@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -24,7 +25,6 @@ type MyEvent struct {
 }
 
 type Response events.APIGatewayProxyResponse
-type Request events.APIGatewayProxyRequest
 
 type Record struct {
 	ID        int64    `json:"id"`
@@ -60,10 +60,9 @@ func unmarshal(scanOutput *dynamodb.ScanOutput) string {
 
 }
 
-func search(query string) string {
+func listProduct() string {
 
-	filt := expression.Name("title").Contains(query)
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+	expr, err := expression.NewBuilder().Build()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -87,26 +86,20 @@ func search(query string) string {
 	return unmarshalledResult
 }
 
-func HandleLambdaEvent(request Request) (Response, error) {
+func HandleLambdaEvent(ctx context.Context) (Response, error) {
 
-	//searchResult := search(event.Query)
-	fmt.Println("requst:")
-	fmt.Println(json.MarshalIndent(request, "", "\t"))
+	result := listProduct()
 
-	fmt.Println("request.PathParameters[q]")
-	fmt.Println(request.PathParameters["q"])
-	searchResult := search(request.PathParameters["q"])
-
-	fmt.Println("searchResult:")
-	fmt.Println(searchResult)
+	fmt.Println("result:")
+	fmt.Println(result)
 
 	resp := Response{
 		StatusCode:      200,
 		IsBase64Encoded: false,
-		Body:            searchResult,
+		Body:            result,
 		Headers: map[string]string{
 			"Content-Type":      "application/json",
-			"X-HTHC-Func-Reply": "search-handler",
+			"X-HTHC-Func-Reply": "list-handler",
 		},
 	}
 

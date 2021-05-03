@@ -55,7 +55,7 @@ provider:
       # Restrict our IAM role permissions to
       # the specific table for the stage
       Resource:
-        - "*" ## todo: fix
+        - "*" ## todo: fix (least privilege)
 
 # you can define service wide environment variables here
 #  environment:
@@ -67,11 +67,17 @@ package:
     - ./bin/**
 
 functions:
+  list:
+    handler: bin/list
+    events:
+      - httpApi:
+          path: /products
+          method: get
   search:
     handler: bin/search
     events:
       - httpApi:
-          path: /products
+          path: /products/{q}
           method: get
   hello:
     handler: bin/hello
