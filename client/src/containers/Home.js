@@ -87,9 +87,9 @@ export default function Home() {
     return (
       <div className="products">
         <Jumbotron>
-        <h1>Ramadhan Big Sale!</h1>
+        <h1>Grand Opening Promo</h1>
         <p>
-        Enjoy affordable one-stop shopping with Heroj. Now free shipping worldwide*
+        Enjoy affordable one-stop shopping at HeroJ Online. Now free shipping worldwide*
         </p>
         <p>
           <Button variant="primary">Show Promotions</Button>
