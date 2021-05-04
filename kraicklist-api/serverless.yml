@@ -48,14 +48,10 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:DescribeTable
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
-      # Restrict our IAM role permissions to
-      # the specific table for the stage
-      Resource:
-        - "*" ## todo: fix (least privilege)
+      Resource: "*"   # todo: fix
 
 # you can define service wide environment variables here
 #  environment:
@@ -77,9 +73,14 @@ functions:
     handler: bin/search
     events:
       - httpApi:
-          path: /products/{q}
+          path: /search/{q}
           method: get
-
+  get:
+    handler: bin/get
+    events:
+      - httpApi:
+          path: /products/{id}
+          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
