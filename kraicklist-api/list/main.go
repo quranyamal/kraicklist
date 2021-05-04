@@ -98,8 +98,9 @@ func HandleLambdaEvent(ctx context.Context) (Response, error) {
 		IsBase64Encoded: false,
 		Body:            result,
 		Headers: map[string]string{
-			"Content-Type":      "application/json",
-			"X-HTHC-Func-Reply": "list-handler",
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"X-HTHC-Func-Reply":           "list-handler",
 		},
 	}
 

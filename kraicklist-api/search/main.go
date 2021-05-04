@@ -105,8 +105,9 @@ func HandleLambdaEvent(request Request) (Response, error) {
 		IsBase64Encoded: false,
 		Body:            searchResult,
 		Headers: map[string]string{
-			"Content-Type":      "application/json",
-			"X-HTHC-Func-Reply": "search-handler",
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"X-HTHC-Func-Reply":           "search-handler",
 		},
 	}
 

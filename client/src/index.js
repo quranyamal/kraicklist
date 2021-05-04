@@ -23,7 +23,7 @@ Amplify.configure({
   API: {
     endpoints: [
       {
-        name: "hthc",
+        name: "kraicklist",
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION
       },
