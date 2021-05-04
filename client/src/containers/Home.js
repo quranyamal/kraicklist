@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import ListGroup from "react-bootstrap/ListGroup";
 import { API } from "aws-amplify";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
-import { BsPencilSquare } from "react-icons/bs";
-import { LinkContainer } from "react-router-bootstrap";
-import { Col, Row } from "react-bootstrap";
-import Image from 'react-bootstrap/Image'
-import Badge from 'react-bootstrap/Badge'
+import { Col, Container } from "react-bootstrap";
+import { Image, Badge, Button, Jumbotron } from 'react-bootstrap'
+import { Card, CardGroup, ListGroup} from 'react-bootstrap'
 import "./Home.css";
 
 export default function Home() {
@@ -41,36 +38,38 @@ export default function Home() {
   function renderProductList(products) {
     return (
       <>
+      <Container>
+          <CardGroup>
         {products.map(({ id, title, content, thumb_url, tags, updated_at }) => (
-          <LinkContainer key={id} to={`/products/${id}`}>
-            <ListGroup.Item action>
-              <Row>
-                <Col xs={6} md={2}>
-                  <Image src={thumb_url} rounded />
-                </Col>
-                <Col xs={12} md={9}>
-                  <span className="font-weight-bold">
-                    {title}
-                  </span>
-                  <br />
-                  <span className="text-muted">
-                    {tags.map((tag) => (
-                        <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
-                    ))}
-
-                  </span>
-                  <br />
-                  <span className="text-muted">
-                    Updated: {Intl.DateTimeFormat('en-US', 
-                      { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
-                        minute: '2-digit', second: '2-digit' 
-                      }).format(updated_at*1000)}
-                  </span>
-                </Col>
-              </Row>
-            </ListGroup.Item>
-          </LinkContainer>
+          <Col className="col-sm-4 d-flex pb-3">
+                <Card className="card-item">
+                  <Image className="card-img-top" src={thumb_url} fluid/>
+                  <Card.Body>
+                    <Card.Title>{title}</Card.Title>
+                    <Card.Text>
+                      <span className="text-muted">
+                        {tags.map((tag) => (
+                            <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
+                        ))}
+                      </span>
+                      <br />
+                    </Card.Text>
+                    <span className="text-muted">
+                        {Intl.DateTimeFormat('en-US', 
+                          { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
+                          minute: '2-digit', second: '2-digit' 
+                        }).format(updated_at*1000)}
+                    </span><br />
+                  </Card.Body>
+                  <Card.Body>
+                    <Card.Link href={`/products/${id}`}><Button variant="primary" block>Detail</Button></Card.Link>
+                  </Card.Body>
+                </Card>
+              
+            </Col>
         ))}
+          </CardGroup>
+          </Container>
       </>
     );
   }
@@ -87,7 +86,15 @@ export default function Home() {
   function renderProducts() {
     return (
       <div className="products">
-        <h2 className="pb-3 mt-4 mb-3 border-bottom">What do want to buy today?</h2>
+        <Jumbotron>
+        <h1>Ramadhan Big Sale!</h1>
+        <p>
+        Enjoy affordable one-stop shopping with Heroj. Now free shipping worldwide*
+        </p>
+        <p>
+          <Button variant="primary">Show Promotions</Button>
+        </p>
+      </Jumbotron>        
         <ListGroup>{!isLoading && renderProductList(products)}</ListGroup>
       </div>
     );
