@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
-import { Col, Container } from "react-bootstrap";
-import { Image, Badge, Button, Jumbotron } from 'react-bootstrap'
+import { Col, Row } from "react-bootstrap";
+import { Image, Badge, Button, Jumbotron, Form } from 'react-bootstrap'
+import { LinkContainer } from "react-router-bootstrap";
 import { Card, CardGroup, ListGroup} from 'react-bootstrap'
 import "./Home.css";
 
@@ -11,6 +12,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
+  const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
     async function onLoad() {
@@ -27,7 +29,7 @@ export default function Home() {
   
       setIsLoading(false);
     }
-  
+
     onLoad();
   }, [isAuthenticated]);
   
@@ -37,11 +39,11 @@ export default function Home() {
 
   function renderProductList(products) {
     return (
-      <>
-      <Container>
-          <CardGroup>
-        {products.map(({ id, title, content, thumb_url, tags, updated_at }) => (
+      <CardGroup>
+        {products.map(({ id, title, thumb_url, tags, updated_at }) => (
           <Col className="col-sm-4 d-flex pb-3">
+            <LinkContainer to={`/products/${id}`}>
+
                 <Card className="card-item">
                   <Image className="card-img-top" src={thumb_url} fluid/>
                   <Card.Body>
@@ -49,8 +51,8 @@ export default function Home() {
                     <Card.Text>
                       <span className="text-muted">
                         {tags.map((tag) => (
-                            <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
-                        ))}
+                          <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
+                          ))}
                       </span>
                       <br />
                     </Card.Text>
@@ -65,20 +67,18 @@ export default function Home() {
                     <Card.Link href={`/products/${id}`}><Button variant="primary" block>Detail</Button></Card.Link>
                   </Card.Body>
                 </Card>
-              
+              </LinkContainer>
             </Col>
         ))}
-          </CardGroup>
-          </Container>
-      </>
+      </CardGroup>
     );
   }
-
+        
   function renderLander() {
     return (
       <div className="lander">
-        <h1>Haraj</h1>
-        <p className="text-muted">Haraj Take Home Challenge</p>
+        <h1>HeroJ</h1>
+        <p className="text-muted">A Haraj Take Home Challenge</p>
       </div>
     );
   }
@@ -87,14 +87,26 @@ export default function Home() {
     return (
       <div className="products">
         <Jumbotron>
-        <h1>Grand Opening Promo</h1>
-        <p>
-        Enjoy affordable one-stop shopping at HeroJ Online. Now free shipping worldwide*
-        </p>
-        <p>
-          <Button variant="primary">Show Promotions</Button>
-        </p>
-      </Jumbotron>        
+          <h1>Grand Opening Promo</h1>
+          <p>
+          Enjoy affordable one-stop shopping at HeroJ Online. Now free shipping worldwide*
+          </p>
+            <Row>
+              <Col md={6} sm={8} sx={12}>
+                <Form.Control 
+                  type="text" 
+                  placeholder="search a product" 
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  />
+              </Col>
+              <Col>
+                <LinkContainer to={`/search/${keyword}`} className="btn btn-primary">
+                  <Button>Search</Button>
+                </LinkContainer>
+              </Col>
+            </Row>
+        </Jumbotron>        
         <ListGroup>{!isLoading && renderProductList(products)}</ListGroup>
       </div>
     );

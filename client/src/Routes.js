@@ -3,6 +3,7 @@ import { Route, Switch } from "react-router-dom";
 import Home from "./containers/Home";
 import Login from "./containers/Login";
 import Product from "./containers/Product"
+import Search from "./containers/Search";
 import NotFound from "./containers/NotFound";
 
 export default function Routes() {
@@ -16,6 +17,9 @@ export default function Routes() {
       </Route>
       <Route exact path="/products/:id">
         <Product />
+      </Route>
+      <Route exact path="/search/:q">
+        <Search />
       </Route>
       {/* Finally, catch all unmatched routes */}
       <Route>

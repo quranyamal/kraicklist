@@ -1,37 +1,28 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { useParams } from "react-router-dom";
-import { Col, Container, Row, Image, Badge, Carousel } from "react-bootstrap";
+import { Col, Row, Image, Badge, Carousel } from "react-bootstrap";
 import "./Product.css";
 
 export default function Product(props) {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  console.log("==props 12:");
-  console.log(props);
   
   useEffect(() => {
     function loadProduct() {
-      console.log("loading product");
+      console.log("loading product...");
         return API.get("kraicklist", `/products/${id}`);
-      // return API.get("kraicklist", `/products/72385418`);
     }
 
     async function onLoad() {
-      setIsLoading(false);
       console.log("onLoad");
       try {
         const product = await loadProduct();
-        console.log("nggak eror, product nya:");
+        console.log("product:");
         console.log(product)
-        const { id, title, content, image_urls } = product;
-
-        // setContent(content);
         setProduct(product);
       } catch (e) {
-        console.log("eror woy");
+        console.log("OnLoad @ Product.js | Error:");
         console.log(e);
         alert(e);
       }
