@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { Col, Row, Image, Badge, Button, Form } from "react-bootstrap";
 import { Card, CardGroup } from 'react-bootstrap'
 import { LinkContainer } from "react-router-bootstrap";
 
 export default function Search(props) {
-
-    const [products, setProducts] = useState(null);
-    const { isAuthenticated } = useAppContext();
-    const [isLoading, setIsLoading] = useState(true);
-    const { q } = useParams();
-    const [keyword, setKeyword] = useState("");
+  
+  const [products, setProducts] = useState(null);
+  const { isAuthenticated } = useAppContext();
+  const [isLoading, setIsLoading] = useState(true);
+  const { q } = useParams();
+  const [keyword, setKeyword] = useState("");
+  const history = useHistory();
 
     useEffect(() => {
       async function onSearch() {
@@ -29,6 +30,7 @@ export default function Search(props) {
         }
     
         setIsLoading(false);
+        setKeyword(q)
       }
       
       onSearch();
@@ -39,9 +41,38 @@ export default function Search(props) {
         return await API.get("kraicklist", `/search/${q}`);
     }
 
-    function renderProductList(products) {
-        return (
-          <CardGroup>
+    async function updateSearchResult() {
+      console.log(new Date()+": updating serach result ...")
+      const result = await API.get("kraicklist", `/search/${keyword}`);
+      setProducts(result);
+      history.push(`/search/${keyword}`)
+    }
+
+    return (
+        <div className="Products">
+            <Row>
+              <Col md={6} sm={8} sx={12}>
+                <Form.Control 
+                  type="text" 
+                  placeholder="search a heroj good" 
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyPress={event => {
+                    if (event.key === "Enter") {
+                      keyword && updateSearchResult()
+                    }
+                  }}
+                  />
+              </Col>
+              <Col>
+                  <a href={`/search/${keyword}`}><Button>Search</Button></a>
+              </Col>
+            </Row>
+            <br/><br/>
+            {isLoading ? "Loading..." 
+            :products!=null ? 
+
+            <CardGroup>
             {products.map(({ id, title, thumb_url, tags, updated_at }) => (
               <Col className="col-sm-4 d-flex pb-3">
                 <LinkContainer to={`/products/${id}`}>
@@ -72,29 +103,6 @@ export default function Search(props) {
                 </Col>
             ))}
           </CardGroup>
-        );
-      }
-
-    return (
-        <div className="Products">
-            <Row>
-              <Col md={6} sm={8} sx={12}>
-                <Form.Control 
-                  type="text" 
-                  placeholder="search a product" 
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  />
-              </Col>
-              <Col>
-                <LinkContainer to={`/search/${keyword}`} className="btn btn-primary">
-                  <Button>Search</Button>
-                </LinkContainer>
-              </Col>
-            </Row>
-            <br/><br/>
-            {isLoading ? "Loading..." 
-            :products!=null ? renderProductList(products) 
                 : `no product found with the keyword: ${q}`
             }
         </div>

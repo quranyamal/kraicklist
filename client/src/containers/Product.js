@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
-import { useParams } from "react-router-dom";
-import { Col, Row, Image, Badge, Carousel } from "react-bootstrap";
+import { useParams, useHistory } from "react-router-dom";
+import { Col, Row, Image, Badge, Carousel, Button } from "react-bootstrap";
 import "./Product.css";
 
 export default function Product(props) {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  
+  const history = useHistory();
+
   useEffect(() => {
     function loadProduct() {
       console.log("loading product...");
@@ -52,6 +53,7 @@ export default function Product(props) {
           Updated: {Intl.DateTimeFormat('en-US', 
            { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
               minute: '2-digit', second: '2-digit' }).format(product.updated_at*1000)}
+          <br/><br/>
         </Col>
       </Row>
     )

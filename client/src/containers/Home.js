@@ -6,6 +6,7 @@ import { Col, Row } from "react-bootstrap";
 import { Image, Badge, Button, Jumbotron, Form } from 'react-bootstrap'
 import { LinkContainer } from "react-router-bootstrap";
 import { Card, CardGroup, ListGroup} from 'react-bootstrap'
+import { useHistory } from "react-router-dom";
 import "./Home.css";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
+  const history = useHistory();
 
   useEffect(() => {
     async function onLoad() {
@@ -95,9 +97,14 @@ export default function Home() {
               <Col md={6} sm={8} sx={12}>
                 <Form.Control 
                   type="text" 
-                  placeholder="search a product" 
+                  placeholder="search a heroj good" 
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  onKeyPress={event => {
+                    if (event.key === "Enter") {
+                      keyword && history.push(`/search/${keyword}`)
+                    }
+                  }}
                   />
               </Col>
               <Col>
