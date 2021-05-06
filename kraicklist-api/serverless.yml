@@ -7,13 +7,15 @@ provider:
   lambdaHashingVersion: 20201221
   stage: prod
   region: me-south-1
+  environment:
+    DYNAMODB_TABLE: kraicklist-${opt:stage, self:provider.stage}-products
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
-      Resource: "*"   # todo: fix
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
   list:
@@ -40,4 +42,21 @@ functions:
       - httpApi:
           path: /products/{id}
           method: get
-        
+
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: N
+          - AttributeName: updated_at
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: updated_at
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST

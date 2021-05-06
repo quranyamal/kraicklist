@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -72,7 +73,7 @@ func search(query string) string {
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
-		TableName:                 aws.String("hthc-kraicklist-data"),
+		TableName:                 aws.String(os.Getenv("DYNAMODB_TABLE")),
 	}
 
 	result, err := svc.Scan(input)

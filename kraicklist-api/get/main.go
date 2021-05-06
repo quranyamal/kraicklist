@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -35,28 +36,6 @@ type Record struct {
 	ImageURLs []string `json:"image_urls"`
 }
 
-// func getItem(id int) (string, error) {
-
-// 	// GetItem request
-// 	result, err := svc.GetItem(&dynamodb.GetItemInput{
-// 		TableName: aws.String("hthc-kraicklist-data"),
-// 		Key: map[string]*dynamodb.AttributeValue{
-// 			"id": {
-// 				S: aws.String(*aws.String(strconv.Itoa(id))),
-// 			},
-// 		},
-// 	})
-
-// 	// Checking for errors, return error
-// 	if err != nil {
-// 		fmt.Println("Query API call failed: ", err.Error())
-// 	}
-
-// 	unmarshalledResult := unmarshal(result)
-
-// 	return unmarshalledResult, nil
-// }
-
 func HandleLambdaEvent(request Request) (Response, error) {
 
 	//searchResult := search(event.Query)
@@ -67,7 +46,7 @@ func HandleLambdaEvent(request Request) (Response, error) {
 	fmt.Println(request.PathParameters["id"])
 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("hthc-kraicklist-data"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
 				N: aws.String(request.PathParameters["id"]),
@@ -75,14 +54,7 @@ func HandleLambdaEvent(request Request) (Response, error) {
 		},
 	})
 
-	// result, err := getItem(request.PathParameters["q"])
-
-	// Created item of type Item
 	item := Record{}
-
-	// result is of type *dynamodb.GetItemOutput
-	// result.Item is of type map[string]*dynamodb.AttributeValue
-	// UnmarshallMap result.item into item
 	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
 
 	if err != nil {
