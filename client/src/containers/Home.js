@@ -42,7 +42,9 @@ export default function Home() {
   function renderProductList(products) {
     return (
       <CardGroup>
-        {products.map(({ id, title, thumb_url, tags, updated_at }) => (
+        {
+        !products ? <p>no product data available</p> :
+        products.map(({ id, title, thumb_url, tags, updated_at }) => (
           <Col className="col-sm-4 d-flex pb-3">
             <LinkContainer to={`/products/${id}`}>
 

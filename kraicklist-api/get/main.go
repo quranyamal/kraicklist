@@ -67,14 +67,21 @@ func HandleLambdaEvent(request Request) (Response, error) {
 	fmt.Println(result)
 
 	// Checking for errors, return error
+	// todo: fix format
 	if err != nil {
 		fmt.Println(err.Error())
-		return Response{StatusCode: 500}, nil
+		return Response{
+			StatusCode: 500,
+			Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
+		}, nil
 	}
 
 	// Checking type
 	if len(result.Item) == 0 {
-		return Response{StatusCode: 404}, nil
+		return Response{
+			StatusCode: 404,
+			Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
+		}, nil
 	}
 
 	resp := Response{

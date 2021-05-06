@@ -34,6 +34,7 @@ export default function Product(props) {
 
   function renderProduct() {
     return (
+      product && 
       <Row>
         <Col className="col-md-4">
           <Carousel>
