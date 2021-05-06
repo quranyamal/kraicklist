@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
-import { useAppContext } from "../libs/contextLib";
+// import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
 import { useParams, useHistory } from "react-router-dom";
 import { Col, Row, Image, Badge, Button, Form } from "react-bootstrap";
@@ -10,7 +10,7 @@ import { LinkContainer } from "react-router-bootstrap";
 export default function Search(props) {
   
   const [products, setProducts] = useState(null);
-  const { isAuthenticated } = useAppContext();
+  // const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const { q } = useParams();
   const [keyword, setKeyword] = useState("");
@@ -18,9 +18,9 @@ export default function Search(props) {
 
     useEffect(() => {
       async function onSearch() {
-        if (!isAuthenticated) {
-          return;
-        }
+        // if (!isAuthenticated) {
+        //   return;
+        // }
     
         try {
           const result = await searchProducts();
@@ -34,7 +34,7 @@ export default function Search(props) {
       }
       
       onSearch();
-    }, [isAuthenticated]);
+    }, [true]);
 
     async function searchProducts() {
         console.log("Searching ...")

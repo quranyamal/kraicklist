@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
-import { useAppContext } from "../libs/contextLib";
+// import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
 import { Col, Row } from "react-bootstrap";
 import { Image, Badge, Button, Jumbotron, Form } from 'react-bootstrap'
@@ -11,16 +11,16 @@ import "./Home.css";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const { isAuthenticated } = useAppContext();
+  // const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const history = useHistory();
 
   useEffect(() => {
     async function onLoad() {
-      if (!isAuthenticated) {
-        return;
-      }
+      // if (!isAuthenticated) {
+      //   return;
+      // }
   
       try {
         const products = await loadProducts();
@@ -33,7 +33,7 @@ export default function Home() {
     }
 
     onLoad();
-  }, [isAuthenticated]);
+  }, true);
   
   function loadProducts() {
     return API.get("kraicklist", "/products");
@@ -82,7 +82,7 @@ export default function Home() {
     return (
       <div className="lander">
         <h1>HeroJ</h1>
-        <p className="text-muted">A Haraj Take Home Challenge</p>
+        <p className="text-muted">A Haraj Take Home Challenge. Please sign in to use this app</p>
       </div>
     );
   }
@@ -123,7 +123,8 @@ export default function Home() {
 
   return (
     <div className="Home">
-      {isAuthenticated ? renderProducts() : renderLander()}
+      {/* {isAuthenticated ? renderProducts() : renderLander()} */}
+      {renderProducts()}
     </div>
   );
 }
