@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { useParams, useHistory } from "react-router-dom";
-import { Col, Row, Image, Badge, Carousel, Button } from "react-bootstrap";
+import { Col, Row, Image, Badge, Carousel } from "react-bootstrap";
 import "./Product.css";
 
 export default function Product(props) {
@@ -12,7 +12,7 @@ export default function Product(props) {
   useEffect(() => {
     function loadProduct() {
       console.log("loading product...");
-        return API.get("kraicklist", `/products/${id}`);
+        return API.get("ESLive", `/products/_doc/${id}`);
     }
 
     async function onLoad() {
@@ -38,22 +38,22 @@ export default function Product(props) {
       <Row>
         <Col className="col-md-4">
           <Carousel>
-            {product.image_urls.map((image_url) => (
+            {product._source.image_urls.map((image_url) => (
               <Carousel.Item><Image src={image_url} fluid/><br/></Carousel.Item>
             ))}
           </Carousel>
         </Col>
         <Col className="col-md-8">
-          <h2>{product.title}</h2>
-          {product.tags.map((tag) => (
+          <h2>{product._source.title}</h2>
+          {product._source.tags.map((tag) => (
             <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
           ))}
           <br/><br/>
-          <strong>Price: {product.id} SR</strong><br/>
-          {product.content}<br/><br/>
+          <strong>Price: {product._id} SR</strong><br/>
+          {product._source.content}<br/><br/>
           Updated: {Intl.DateTimeFormat('en-US', 
            { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
-              minute: '2-digit', second: '2-digit' }).format(product.updated_at*1000)}
+              minute: '2-digit', second: '2-digit' }).format(product._source.updated_at*1000)}
           <br/><br/>
         </Col>
       </Row>

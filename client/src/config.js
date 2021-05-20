@@ -7,6 +7,9 @@ const config = {
       REGION: "me-south-1",
       URL: "https://chtigmoe7g.execute-api.me-south-1.amazonaws.com",
     },
+    elasticsearchLocal: {
+      URL: "http://localhost:9200",
+    },
     cognito: {
       REGION: "ap-southeast-1",
       USER_POOL_ID: "ap-southeast-1_juoiN7kLV",

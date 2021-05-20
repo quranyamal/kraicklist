@@ -27,6 +27,14 @@ Amplify.configure({
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION
       },
+      {
+        name: "ESLocal",
+        endpoint: config.elasticsearchLocal.URL,
+      },
+      {
+        name: "ESLive",
+        endpoint: config.elasticsearchLocal.URL,
+      },
     ]
   }
 });

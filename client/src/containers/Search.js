@@ -13,99 +13,107 @@ export default function Search(props) {
   // const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const { q } = useParams();
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(q);
   const history = useHistory();
 
-    useEffect(() => {
-      async function onSearch() {
-        // if (!isAuthenticated) {
-        //   return;
-        // }
-    
-        try {
-          const result = await searchProducts();
-          setProducts(result);
-        } catch (e) {
-          onError(e);
-        }
-    
-        setIsLoading(false);
-        setKeyword(q)
+  useEffect(() => {
+    async function onSearch() {
+      // if (!isAuthenticated) {
+      //   return;
+      // }
+  
+      try {
+        const result = await searchProducts();
+        setProducts(result.hits.hits);
+      } catch (e) {
+        onError(e);
       }
-      
-      onSearch();
-    }, [true]);
-
-    async function searchProducts() {
-        console.log("Searching ...")
-        return await API.get("kraicklist", `/search/${q}`);
+  
+      setIsLoading(false);
+      setKeyword(q)
     }
+    
+    onSearch();
+  }, [true]);
 
-    async function updateSearchResult() {
-      console.log(new Date()+": updating serach result ...")
-      const result = await API.get("kraicklist", `/search/${keyword}`);
-      setProducts(result);
-      history.push(`/search/${keyword}`)
-    }
+  async function searchProducts() {
+    // const response = await client.search({
+    //   index: 'products',
+    //   body: {
+    //     query: {
+    //       match: { title: `{$q}` }
+    //     }
+    //   }
+    // })
+    
+    setIsLoading(true);
+    const path = "/products/_search?q=title:"+keyword+"&size=12";
+    const response = await API.get("ESLive", path);
+    setIsLoading(false);
+    return response;
+  }
 
-    return (
-        <div className="Products">
-            <Row>
-              <Col md={6} sm={8} sx={12}>
-                <Form.Control 
-                  type="text" 
-                  placeholder="search a heroj good" 
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  onKeyPress={event => {
-                    if (event.key === "Enter") {
-                      keyword && updateSearchResult()
-                    }
-                  }}
-                  />
-              </Col>
-              <Col>
-                  <a href={`/search/${keyword}`}><Button>Search</Button></a>
-              </Col>
-            </Row>
-            <br/><br/>
-            {isLoading ? "Loading..." 
-            :products!=null ? 
+  async function updateSearchResult() {
+    history.push(`/search/${keyword}`)
+    window.location.reload();
+  }
 
-            <CardGroup>
-            {products.map(({ id, title, thumb_url, tags, updated_at }) => (
-              <Col className="col-sm-4 d-flex pb-3">
-                <LinkContainer to={`/products/${id}`}>
-                    <Card className="card-item">
-                      <Image className="card-img-top" src={thumb_url} fluid/>
-                      <Card.Body>
-                        <Card.Title>{title}</Card.Title>
-                        <Card.Text>
-                          <span className="text-muted">
-                            {tags.map((tag) => (
-                              <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
-                              ))}
-                          </span>
-                          <br />
-                        </Card.Text>
-                        <span className="text-muted">
-                            {Intl.DateTimeFormat('en-US', 
-                              { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
-                              minute: '2-digit', second: '2-digit' 
-                            }).format(updated_at*1000)}
-                        </span><br />
-                      </Card.Body>
-                      <Card.Body>
-                        <Card.Link href={`/products/${id}`}><Button variant="primary" block>Detail</Button></Card.Link>
-                      </Card.Body>
-                    </Card>
-                  </LinkContainer>
-                </Col>
-            ))}
-          </CardGroup>
-                : `no product found with the keyword: ${q}`
-            }
-        </div>
-    )
+  return (
+    <div className="Products">
+      <Row>
+        <Col md={6} sm={8} sx={12}>
+          <Form.Control 
+            type="text" 
+            placeholder="search a heroj good" 
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyPress={event => {
+              if (event.key === "Enter") {
+                keyword && updateSearchResult()
+              }
+            }}
+            />
+        </Col>
+        <Col>
+            <a href={`/search/${keyword}`}><Button>Search</Button></a>
+        </Col>
+      </Row>
+        <br/><br/>
+        {
+        products==null ? "Loading..." 
+        :
+        products==[] ? `no product found with the keyword: ${keyword}`
+        :
+        <CardGroup>
+        {products.map(({ _id, _source }) => (
+          <Col className="col-sm-4 d-flex pb-3">
+            <LinkContainer to={`/products/${_id}`}>
+                <Card className="card-item">
+                  <Image className="card-img-top" src={_source.thumb_url} fluid/>
+                  <Card.Body>
+                    <Card.Title>{_source.title}</Card.Title>
+                    <Card.Text>
+                      <span className="text-muted">
+                        {_source.tags.map((tag) => (
+                          <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
+                          ))}
+                      </span>
+                      <br />
+                    </Card.Text>
+                    <span className="text-muted">
+                        {Intl.DateTimeFormat('en-US', 
+                          { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
+                          minute: '2-digit', second: '2-digit' 
+                        }).format(_source.updated_at*1000)}
+                    </span><br />
+                  </Card.Body>
+                </Card>
+              </LinkContainer>
+            </Col>
+        ))}
+        </CardGroup>
+        }
+    </div>
+  )
 
 }

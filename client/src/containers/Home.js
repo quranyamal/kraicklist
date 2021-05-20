@@ -23,8 +23,8 @@ export default function Home() {
       // }
   
       try {
-        const products = await loadProducts();
-        setProducts(products);
+        const response = await loadProducts();
+        setProducts(response.hits.hits);
       } catch (e) {
         onError(e);
       }
@@ -36,7 +36,7 @@ export default function Home() {
   }, true);
   
   function loadProducts() {
-    return API.get("kraicklist", "/products");
+    return API.get("ESLive", "/products/_search?size=12");
   }
 
   function renderProductList(products) {
@@ -44,17 +44,17 @@ export default function Home() {
       <CardGroup>
         {
         !products ? <p>no product data available</p> :
-        products.map(({ id, title, thumb_url, tags, updated_at }) => (
+        products.map(({ _id, _source }) => (
           <Col className="col-sm-4 d-flex pb-3">
-            <LinkContainer to={`/products/${id}`}>
+            <LinkContainer to={`/products/${_id}`}>
 
                 <Card className="card-item">
-                  <Image className="card-img-top" src={thumb_url} fluid/>
+                  <Image className="card-img-top" src={_source.thumb_url} fluid/>
                   <Card.Body>
-                    <Card.Title>{title}</Card.Title>
+                    <Card.Title>{_source.title}</Card.Title>
                     <Card.Text>
                       <span className="text-muted">
-                        {tags.map((tag) => (
+                        {_source.tags.map((tag) => (
                           <span><Badge variant="secondary">{tag}</Badge> {' '}</span>
                           ))}
                       </span>
@@ -64,11 +64,8 @@ export default function Home() {
                         {Intl.DateTimeFormat('en-US', 
                           { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', 
                           minute: '2-digit', second: '2-digit' 
-                        }).format(updated_at*1000)}
+                        }).format(_source.updated_at*1000)}
                     </span><br />
-                  </Card.Body>
-                  <Card.Body>
-                    <Card.Link href={`/products/${id}`}><Button variant="primary" block>Detail</Button></Card.Link>
                   </Card.Body>
                 </Card>
               </LinkContainer>
