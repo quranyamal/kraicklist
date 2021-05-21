@@ -12,7 +12,8 @@ export default function Product(props) {
   useEffect(() => {
     function loadProduct() {
       console.log("loading product...");
-        return API.get("ESLive", `/products/_doc/${id}`);
+        // return API.get("ESLive", `/products/_doc/${id}`);
+        return API.get("kraicklist", `/products/${id}`);
     }
 
     async function onLoad() {

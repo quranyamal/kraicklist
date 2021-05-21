@@ -10,6 +10,9 @@ const config = {
     elasticsearchLocal: {
       URL: "http://localhost:9200",
     },
+    elasticsearchLive: {
+      URL: "https://search-kraicklist-kbskg2co6dxfa7ce6dklrnlemm.me-south-1.es.amazonaws.com",
+    },
     cognito: {
       REGION: "ap-southeast-1",
       USER_POOL_ID: "ap-southeast-1_juoiN7kLV",

@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -88,7 +91,7 @@ func search(query string) string {
 	return unmarshalledResult
 }
 
-func HandleLambdaEvent(request Request) (Response, error) {
+func HandleLambdaEventDynamoDB(request Request) (Response, error) {
 
 	//searchResult := search(event.Query)
 	fmt.Println("requst:")
@@ -109,6 +112,52 @@ func HandleLambdaEvent(request Request) (Response, error) {
 			"Content-Type":                "application/json",
 			"Access-Control-Allow-Origin": "*",
 			"X-HTHC-Func-Reply":           "search-handler",
+		},
+	}
+
+	return resp, nil
+}
+
+func HandleLambdaEvent(request Request) (Response, error) {
+	// todo: fix
+	client := &http.Client{}
+
+	uri := os.Getenv("ELASTICSEARCH_DOMAIN") + "/products/_search?q=title:"
+	uri += url.QueryEscape(request.PathParameters["q"]) + "&size=12"
+	req, _ := http.NewRequest("GET", uri, nil)
+	req.Header.Set("Authorization", "Basic ZWxhc3RpYzp6Qzkva0B2ez1jaCU=")
+
+	fmt.Print("url: " + uri)
+	fmt.Print("request:")
+	fmt.Print(request)
+	fmt.Print("request.PathParameters:")
+	fmt.Print(request.PathParameters)
+
+	apiResponse, err := client.Do(req)
+	if err != nil {
+		fmt.Print(err.Error())
+		os.Exit(123)
+	}
+	defer apiResponse.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(apiResponse.Body)
+	if err != nil {
+		fmt.Print(err.Error())
+		os.Exit(1234)
+	}
+
+	fmt.Print("bodyString:")
+	fmt.Print(string(bodyBytes))
+
+	bodyString := string(bodyBytes)
+	resp := Response{
+		StatusCode:      200,
+		IsBase64Encoded: false,
+		Body:            bodyString,
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"X-HTHC-Func-Reply":           "list-handler",
 		},
 	}
 

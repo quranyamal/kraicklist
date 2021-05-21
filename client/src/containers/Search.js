@@ -37,20 +37,9 @@ export default function Search(props) {
   }, [true]);
 
   async function searchProducts() {
-    // const response = await client.search({
-    //   index: 'products',
-    //   body: {
-    //     query: {
-    //       match: { title: `{$q}` }
-    //     }
-    //   }
-    // })
-    
-    setIsLoading(true);
-    const path = "/products/_search?q=title:"+keyword+"&size=12";
-    const response = await API.get("ESLive", path);
-    setIsLoading(false);
-    return response;
+    // todo: improve
+    console.log("Searching ...")
+    return await API.get("kraicklist", `/search/${q}`);
   }
 
   async function updateSearchResult() {
@@ -75,7 +64,7 @@ export default function Search(props) {
             />
         </Col>
         <Col>
-            <a href={`/search/${keyword}`}><Button>Search</Button></a>
+            <a href={`/search/${keyword}`}><Button disabled={!keyword}>Search</Button></a>
         </Col>
       </Row>
         <br/><br/>

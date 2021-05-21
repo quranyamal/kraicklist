@@ -33,7 +33,7 @@ Amplify.configure({
       },
       {
         name: "ESLive",
-        endpoint: config.elasticsearchLocal.URL,
+        endpoint: config.elasticsearchLive.URL,
       },
     ]
   }

@@ -36,7 +36,7 @@ export default function Home() {
   }, true);
   
   function loadProducts() {
-    return API.get("ESLive", "/products/_search?size=12");
+    return API.get("kraicklist", "/products");
   }
 
   function renderProductList(products) {
@@ -108,7 +108,7 @@ export default function Home() {
               </Col>
               <Col>
                 <LinkContainer to={`/search/${keyword}`} className="btn btn-primary">
-                  <Button>Search</Button>
+                  <Button disabled={!keyword}>Search</Button>
                 </LinkContainer>
               </Col>
             </Row>

@@ -9,6 +9,7 @@ provider:
   region: me-south-1
   environment:
     DYNAMODB_TABLE: kraicklist-${opt:stage, self:provider.stage}-products
+    ELASTICSEARCH_DOMAIN: https://search-kraicklist-kbskg2co6dxfa7ce6dklrnlemm.me-south-1.es.amazonaws.com
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -55,3 +56,27 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+    # ElasticsearchDomain:
+    #   Type: AWS::Elasticsearch::Domain
+    #   Properties:
+    #     DomainName: ${self:provider.environment.ELASTICSEARCH_DOMAIN}
+    #     ElasticsearchClusterConfig:
+    #       InstanceCount: "1"
+    #       ZoneAwarenessEnabled: "true"
+    #       InstanceType: "t3.small.elasticsearch"
+    #     EBSOptions:s
+    #       EBSEnabled: true
+    #       VolumeSize: 10
+    #       VolumeType: "gp2"
+    #     AccessPolicies:
+    #       Version: "2012-10-17"
+    #       Statement:
+    #         -
+    #           Effect: "Allow"
+    #           Principal:
+    #             AWS: "arn:aws:iam::123456789012:user/es-user"
+    #           Action: "es:*"
+    #           Resource: "arn:aws:es:us-east-1:846973539254:domain/test/*"
+    #     AdvancedOptions:
+    #       rest.action.multi.allow_explicit_index: "true"
