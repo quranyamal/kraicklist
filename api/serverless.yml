@@ -1,0 +1,38 @@
+service: kraicklist-api
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: go1.x
+  lambdaHashingVersion: 20201221
+  stage: prod
+  region: me-south-1
+  environment:
+    ELASTICSEARCH_ENDPOINT: 
+      Fn::ImportValue: kraicklist:${self:provider.stage}:es:endpoint
+
+functions:
+  list:
+    handler: bin/list
+    package:
+      include: ./bin/list
+    events:
+      - httpApi:
+          path: /products
+          method: get
+  search:
+    handler: bin/search
+    package:
+      include: ./bin/search
+    events:
+      - httpApi:
+          path: /search/{q}
+          method: get
+  get:
+    handler: bin/get
+    package:
+      include: ./bin/get
+    events:
+      - httpApi:
+          path: /products/{id}
+          method: get

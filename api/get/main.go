@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,40 +10,34 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type Response events.APIGatewayProxyResponse
-type Request events.APIGatewayProxyRequest
-
-func HandleLambdaEvent(request Request) (Response, error) {
-
-	uri := os.Getenv("ELASTICSEARCH_DOMAIN") + "/products/_search"
-	var query = `{"size": 12, "query": { "match": {"title": {`
-	query += `"query":"` + request.PathParameters["q"] + `", "fuzziness": 1 }}}}`
-	req, _ := http.NewRequest("GET", uri, bytes.NewBuffer([]byte(query)))
-	req.Header.Set("Content-Type", "application/json")
+func HandleLambdaEvent(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	client := &http.Client{}
+	url := "https://" + os.Getenv("ELASTICSEARCH_ENDPOINT") + "/products/_doc/" + request.PathParameters["id"]
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Basic ZWxhc3RpYzp6Qzkva0B2ez1jaCU=")
 
-	fmt.Print("query:")
-	fmt.Print(query)
+	fmt.Print("request PathParameters:")
+	fmt.Print(request.PathParameters)
+	fmt.Print("request url:" + url)
 
-	client := &http.Client{}
 	apiResponse, err := client.Do(req)
 	if err != nil {
 		fmt.Print(err.Error())
-		os.Exit(123)
+		os.Exit(10)
 	}
 	defer apiResponse.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(apiResponse.Body)
 	if err != nil {
 		fmt.Print(err.Error())
-		os.Exit(1234)
+		os.Exit(11)
 	}
 
 	bodyString := string(bodyBytes)
 	fmt.Print("response body:")
 	fmt.Print(bodyString)
 
-	resp := Response{
+	resp := events.APIGatewayProxyResponse{
 		StatusCode:      200,
 		IsBase64Encoded: false,
 		Body:            bodyString,

@@ -13,7 +13,7 @@ import (
 
 func HandleLambdaEvent(ctx context.Context) (events.APIGatewayProxyResponse, error) {
 	client := &http.Client{}
-	url := os.Getenv("ELASTICSEARCH_DOMAIN") + "/products/_search?size=12"
+	url := "https://" + os.Getenv("ELASTICSEARCH_ENDPOINT") + "/products/_search?size=12"
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Basic ZWxhc3RpYzp6Qzkva0B2ez1jaCU=")
 
