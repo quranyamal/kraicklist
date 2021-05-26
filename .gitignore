@@ -2,3 +2,4 @@
 /node_modules
 /data-util/node_modules
 /data-util/output
+/elasticsearch/.serverless

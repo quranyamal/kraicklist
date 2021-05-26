@@ -3,17 +3,33 @@ const zlib     = require('zlib');
 const readline = require('readline');
 const axios    = require('axios');
 const exec     = require('child_process').exec;
+const AWS      = require('aws-sdk')
 
-let inputFile = 'data.gz'
+let inputFile    = 'data.gz'
 let outputFolder = './output'
 let outputPrefix = outputFolder+'/ads-batch'
-let esEndpoint = "https://search-kraicklist-prod-es-zt52mtu2umn5qozlmxdadi6osu.me-south-1.es.amazonaws.com"
-let index = 'products'
-let authHeader = 'Basic ZWxhc3RpYzp6Qzkva0B2ez1jaCU='
 
-let adsCount = 0
-let fileCount = 0
+let adsCount     = 0
+let fileCount    = 0
 let batchUploadSize = 500
+
+let esEndpoint   = null
+let index        = 'products'
+let authHeader   = 'Basic ZWxhc3RpYzp6Qzkva0B2ez1jaCU=' // change this variable to your auth header
+
+async function getElasticsearchEndpoint(awsRegion, cfStackName) {
+    var cf = new AWS.CloudFormation({ region: awsRegion });
+    let response = await cf.describeStacks({StackName: cfStackName}).promise()
+
+    let endpoint = null
+    for (let output of response.Stacks[0].Outputs) {
+        if (output.OutputKey == "DomainEndpoint") {
+            endpoint = "https://"+output.OutputValue
+            break;
+        }
+    }
+    return endpoint
+}
 
 async function createMapping() {
     let reqUrl = esEndpoint+'/'+index
@@ -70,7 +86,7 @@ function bulkIndex() {
     
     lineReader.on('line', (line) => {
         payload = JSON.parse(line)
-        console.log("Exporting Ads-"+adsCount+". id = "+payload.id+" | title = "+payload.title);
+        // console.log("Exporting Ads-"+adsCount+". id = "+payload.id+" | title = "+payload.title);
         
         action = {"index":{"_id": payload.id}}
         fs.appendFileSync(outputFile, JSON.stringify(action)+"\n");
@@ -112,6 +128,8 @@ function bulkIndexApiHit(filename) {
 async function main() {
     
     try {
+        // retrieve Elasticsearch domain endpoint from ClouFormation stack output
+        esEndpoint = await getElasticsearchEndpoint("me-south-1", "kraicklist-es-prod")
         // create mapping on ES
         await createMapping()
         // load data from input file into ES

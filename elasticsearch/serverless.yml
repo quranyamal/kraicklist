@@ -1,0 +1,67 @@
+service: kraicklist-es
+frameworkVersion: '2'
+variablesResolutionMode: 20210326
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: prod
+  region: me-south-1
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action: "es:*"
+          Resource: "arn:aws:es:${self:provider.region}:*:domain/*"
+
+custom:
+  ES_DOMAIN: kraicklist-${self:provider.stage}-es
+
+resources:
+  Resources:
+    ElasticsearchDomain:
+      Type: AWS::Elasticsearch::Domain
+      Properties:
+        DomainName: ${self:custom.ES_DOMAIN}
+        ElasticsearchClusterConfig:
+          InstanceCount: "1"
+          InstanceType: "t3.small.elasticsearch"
+        ElasticsearchVersion: "7.10"
+        EBSOptions:
+          EBSEnabled: true
+          VolumeSize: 15
+          VolumeType: "gp2"
+        DomainEndpointOptions:
+          EnforceHTTPS: true
+        AccessPolicies:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Principal:
+                AWS: "*"
+              Action: "es:*"
+              Resource:
+                Fn::Sub: "arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/${self:custom.ES_DOMAIN}/*"
+        AdvancedOptions:
+          rest.action.multi.allow_explicit_index: "true"
+        NodeToNodeEncryptionOptions: 
+          Enabled: true
+        EncryptionAtRestOptions: 
+          Enabled: true
+          KmsKeyId: 96667d36-5578-4cc2-a158-908f0bdf3468
+        AdvancedSecurityOptions:
+          Enabled: true
+          InternalUserDatabaseEnabled: true
+          MasterUserOptions: 
+            MasterUserName: ${ssm:/kraicklist/${self:provider.stage}/es/username}
+            MasterUserPassword: ${ssm:/kraicklist/${self:provider.stage}/es/password}
+  Outputs:
+    DomainEndpoint:
+      Value:
+        'Fn::GetAtt':
+          - ElasticsearchDomain
+          - DomainEndpoint
+      Export:
+        Name: "kraicklist:${self:provider.stage}:es:endpoint"
