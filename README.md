@@ -16,12 +16,13 @@ Live version can be found [here](http://heroj.com.s3-website.me-south-1.amazonaw
 
 ## Quick Start
 1. Setup pre-requisites
-2. Deploy Elasticsearch service
+2. Store Elasticsearch username (/kraicklist/prod/es/username) & password (/kraicklist/prod/es/password) in [SSM parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
+3. Deploy Elasticsearch service
 ```
 cd ./elasticsearch
 sls deploy
 ```
-3. Build & Deploy APIs
+4. Build & Deploy APIs
 ```
 cd ../api
 set GOOS=linux
@@ -30,21 +31,21 @@ go build -ldflags="-s -w" -o bin/search search/main.go
 go build -ldflags="-s -w" -o bin/get get/main.go
 sls deploy
 ```
-4. Build website files host in S3
+5. Build website files host in S3
 ```
 cd ../client
 npm run build
 aws s3api create-bucket --bucket [bucket-name]
 aws s3 sync build/ s3://[bucket-name]
 ```
-5. Enable website hosting for S3 bucket - [ref](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EnableWebsiteHosting.html/)
-6. Import data
+6. Enable website hosting for S3 bucket - [ref](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EnableWebsiteHosting.html/)
+7. Import data
 ```
 cd ../data-util
 npm install
 node es-bulk-indexer.js
 ```
-7. Access website (link can be viewed on S3 console)
+8. Access website, link can be viewed on [S3 console](https://s3.console.aws.amazon.com/s3/home)
 
 ## Future Improvements
 - Functional
